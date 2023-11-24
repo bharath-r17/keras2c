@@ -1,64 +1,39 @@
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
- 
-plt.rcParams['figure.figsize'] = (16, 10)
-plt.rcParams['text.usetex'] = True
-plt.rc('font', size=15)
- 
-import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
-import math
- 
-plt.rcParams['figure.figsize'] = (16, 10)
-plt.rc('font', size=15)
- 
-# define random seed for reproducibility
-np.random.seed(1) # numpy seed
-tf.random.set_seed(1) # tensorflow global random seed
- 
- 
-# Generate a uniformly distributed set of random numbers in the range from
-# 0 to 2π, which covers a complete sine wave oscillation
- 
-X = np.random.uniform(
-    low=0, high=2*math.pi, size=10000).astype(np.float32)
- 
-# Shuffle the values to guarantee they're not in order
-np.random.shuffle(X)
- 
-# Calculate the corresponding sine values
-y = np.sin(X).astype(np.float32)
- 
-# Add a small random number to each y value
-y += 0.1 * np.random.randn(*y.shape)
- 
-from sklearn.model_selection import train_test_split
- 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=1)
- 
-model = tf.keras.Sequential(name='sine2')
- 
-# First layer takes a scalar input and feeds it through 16 "neurons". The
-# neurons decide whether to activate based on the 'relu' activation function.
-model.add(tf.keras.layers.Dense(16, activation='relu', input_shape=(1,)))
- 
-# The new second layer may help the network learn more complex representations
-model.add(tf.keras.layers.Dense(16, activation='relu'))
- 
-# Final layer is a single neuron, since we want to output a single value
-model.add(tf.keras.layers.Dense(1))
- 
-# Compile the model using a standard optimizer and loss function for regression
-model.compile(optimizer='adam', loss='mse', metrics=['accuracy', 'mae'])
- 
-model.summary()
- 
-history = model.fit(X_train, y_train, epochs=50, batch_size=64,
-                    validation_data=(X_val, y_val), verbose=False)
+# Import necessary libraries
+from keras.datasets import mnist
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.utils import to_categorical
 
-# model.save('my_model.h5')
+# Load MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
+# Flatten 28*28 images to a 784 vector for each image
+num_pixels = X_train.shape[1] * X_train.shape[2]
+X_train = X_train.reshape((X_train.shape[0], num_pixels)).astype('float32')
+X_test = X_test.reshape((X_test.shape[0], num_pixels)).astype('float32')
+
+# Normalize inputs from 0-255 to 0-1
+X_train = X_train / 255
+X_test = X_test / 255
+
+# One hot encode outputs
+y_train = to_categorical(y_train)
+y_test = to_categorical(y_test)
+num_classes = y_test.shape[1]
+
+# Define the model
+def baseline_model():
+    model = Sequential()
+    model.add(Dense(num_pixels, input_dim=num_pixels, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(num_classes, kernel_initializer='normal', activation='softmax'))
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    return model
+
+# Build the model
+model = baseline_model()
+
+# Fit the model
+model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=10, batch_size=200, verbose=2)
+
+# Save the model
+model.save('mnist_model.h5')
