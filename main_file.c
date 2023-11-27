@@ -15,7 +15,7 @@ int main() {
 
     // Create an output tensor
     float output_data[1]; // Regression output, so only one value
-    k2c_tensor output = {output_data, 21,1,{1,1,1,1,1}}; // Adjust the size to match your model output
+    k2c_tensor output = {output_data, 1,1,{1,1,1,1,1}}; // Adjust the size to match your model output
 
     // Call the generated C function
     test_func(&input, &output); // Replace with the actual name of your generated function
