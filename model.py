@@ -1,52 +1,36 @@
-import tensorflow as tf
-from tensorflow.keras.datasets import imdb
-from tensorflow.keras.layers import Embedding, Dense, LSTM
-from tensorflow.keras.losses import BinaryCrossentropy
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers.legacy import Adam
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from keras.models import Sequential
+from keras.layers import Dense
 
-# Model configuration
-additional_metrics = ['accuracy']
-batch_size = 128
-embedding_output_dims = 15
-loss_function = BinaryCrossentropy()
-max_sequence_length = 300
-num_distinct_words = 5000
-number_of_epochs = 5
-optimizer = Adam()
-validation_split = 0.20
-verbosity_mode = 1
+# Load the California Housing dataset
+california_housing = fetch_california_housing()
+X = california_housing.data
+y = california_housing.target
 
-# Disable eager execution
-tf.compat.v1.disable_eager_execution()
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Load dataset
-(x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=num_distinct_words)
-print(x_train.shape)
-print(x_test.shape)
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
-# Pad all sequences
-padded_inputs = pad_sequences(x_train, maxlen=max_sequence_length, value = 0.0) # 0.0 because it corresponds with <PAD>
-padded_inputs_test = pad_sequences(x_test, maxlen=max_sequence_length, value = 0.0) # 0.0 because it corresponds with <PAD>
-
-# Define the Keras model
+# Build the regression model
 model = Sequential()
-model.add(Embedding(num_distinct_words, embedding_output_dims, input_length=max_sequence_length))
-model.add(LSTM(10))
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(32, input_dim=8, activation='relu'))  # 8 input features in the California Housing dataset
+model.add(Dense(16, activation='relu'))
+model.add(Dense(1, activation='linear'))  # Output layer with one neuron for regression
 
 # Compile the model
-model.compile(optimizer=optimizer, loss=loss_function, metrics=additional_metrics)
-
-# Give a summary
-model.summary()
+model.compile(optimizer='adam', loss='mean_squared_error')
 
 # Train the model
-history = model.fit(padded_inputs, y_train, batch_size=batch_size, epochs=number_of_epochs, verbose=verbosity_mode, validation_split=validation_split)
+model.fit(X_train, y_train, epochs=100, batch_size=32, validation_data=(X_test, y_test))
 
-# Test the model after training
-test_results = model.evaluate(padded_inputs_test, y_test, verbose=False)
-print(f'Test results - Loss: {test_results[0]} - Accuracy: {100*test_results[1]}%')
+# Evaluate the model on the test set
+loss = model.evaluate(X_test, y_test)
+print(f'Mean Squared Error on Test Set: {loss}')
 
-model.save('mnist_model.h5')
+model.save("regression_model.h5")
