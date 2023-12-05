@@ -57,27 +57,3 @@ k2c_activationType * k2c_relu = k2c_relu_func;
 
 
 
-/**
- * Rectified Linear Unit activation function.
- *   y = {max_value       if          x >= max_value}
- *       {x               if theta <= x <  max_value}
- *       {alpha*(x-theta) if          x < theta}
- *
- * :param x: array of input values. Gets overwritten by output.
- * :param size: length of input array.
- * :param max_value: maximum value for activated x.
- * :param alpha: slope of negative portion of activation curve.
- * :param theta: threshold for activation.
- */
-void k2c_ReLU(float * x, const size_t size, const float max_value,
-              const float alpha, const float theta) {
-
-    for (size_t i=0; i<size; ++i) {
-        if (x[i] >= max_value) {
-            x[i] = max_value;
-        }
-        else if (x[i] < theta) {
-            x[i] = alpha*(x[i] - theta);
-        }
-    }
-}
