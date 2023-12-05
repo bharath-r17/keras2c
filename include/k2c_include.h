@@ -34,35 +34,8 @@ extern k2c_activationType * k2c_softplus;
 extern k2c_activationType * k2c_softsign;
 
 // Advanced Activations
-void k2c_LeakyReLU(float * x, const size_t size, const float alpha);
-void k2c_PReLU(float * x, const size_t size, const float * alpha);
-void k2c_ELU(float * x, const size_t size, const float alpha);
-void k2c_ThresholdedReLU(float * x, const size_t size, const float theta);
 void k2c_ReLU(float * x, const size_t size, const float max_value, const float negative_slope,
               const float threshold);
-
-// Convolutions
-void k2c_pad1d(k2c_tensor* output, const k2c_tensor* input, const float fill,
-               const size_t * pad);
-void k2c_pad2d(k2c_tensor* output, const k2c_tensor* input, const float fill,
-               const size_t * pad);
-void k2c_pad3d(k2c_tensor* output, const k2c_tensor* input, const float fill,
-               const size_t * pad);
-void k2c_conv1d(k2c_tensor* output, const k2c_tensor* input, const k2c_tensor* kernel,
-                const k2c_tensor* bias, const size_t stride, const size_t dilation,
-                k2c_activationType *activation);
-void k2c_conv2d(k2c_tensor* output, const k2c_tensor* input, const k2c_tensor* kernel,
-                const k2c_tensor* bias, const size_t * stride, const size_t * dilation,
-                k2c_activationType *activation);
-void k2c_conv3d(k2c_tensor* output, const k2c_tensor* input, const k2c_tensor* kernel,
-                const k2c_tensor* bias, const size_t * stride, const size_t * dilation,
-                k2c_activationType *activation);
-void k2c_crop1d(k2c_tensor* output, const k2c_tensor* input, const size_t * crop);
-void k2c_crop2d(k2c_tensor* output, const k2c_tensor* input, const size_t * crop);
-void k2c_crop3d(k2c_tensor* output, const k2c_tensor* input, const size_t * crop);
-void k2c_upsampling1d(k2c_tensor* output, const k2c_tensor* input, const size_t size);
-void k2c_upsampling2d(k2c_tensor* output, const k2c_tensor* input, const size_t * size);
-void k2c_upsampling3d(k2c_tensor* output, const k2c_tensor* input, const size_t * size);
 
 // Core Layers
 void k2c_dense(k2c_tensor* output, const k2c_tensor* input, const k2c_tensor* kernel,
@@ -73,9 +46,6 @@ void k2c_reshape(k2c_tensor *output, const k2c_tensor* input, const size_t * new
 void k2c_permute_dims(k2c_tensor* output, const k2c_tensor* input,
                       const size_t * permute);
 void k2c_repeat_vector(k2c_tensor* output, const k2c_tensor* input, const size_t n);
-
-// Embedding
-void k2c_embedding(k2c_tensor* outputs, const k2c_tensor* inputs, const k2c_tensor* kernel);
 
 // Helper functions
 void k2c_matmul(float * C, const float * A, const float * B, const size_t outrows,
@@ -100,48 +70,4 @@ void k2c_max(k2c_tensor* output, const size_t num_tensors,...);
 void k2c_min(k2c_tensor* output, const size_t num_tensors,...);
 void k2c_concatenate(k2c_tensor* output, const size_t axis, const size_t num_tensors,...);
 
-// Normalization layers
-void k2c_batch_norm(k2c_tensor* outputs, const k2c_tensor* inputs, const k2c_tensor* mean,
-                    const k2c_tensor* stdev, const k2c_tensor* gamma, const k2c_tensor* beta,
-                    const size_t axis);
-
-// Pooling layers
-void k2c_global_max_pooling(k2c_tensor* output, const k2c_tensor* input);
-void k2c_global_avg_pooling(k2c_tensor* output, const k2c_tensor* input);
-void k2c_maxpool1d(k2c_tensor* output, const k2c_tensor* input, const size_t pool_size,
-                   const size_t stride);
-void k2c_maxpool2d(k2c_tensor* output, const k2c_tensor* input, const size_t * pool_size,
-                   const size_t * stride);
-void k2c_avgpool1d(k2c_tensor* output, const k2c_tensor* input, const size_t pool_size,
-                   const size_t stride);
-void k2c_avgpool2d(k2c_tensor* output, const k2c_tensor* input, const size_t * pool_size,
-                   const size_t * stride);
-
-// Recurrent layers
-void k2c_lstmcell(float * state, const float * input, const k2c_tensor* kernel,
-                  const k2c_tensor* recurrent_kernel, const k2c_tensor* bias, float * fwork,
-                  k2c_activationType *recurrent_activation,
-                  k2c_activationType *output_activation);
-void k2c_lstm(k2c_tensor* output, const k2c_tensor* input, float * state,
-              const k2c_tensor* kernel, const k2c_tensor* recurrent_kernel,
-              const k2c_tensor* bias, float * fwork, const int go_backwards,
-              const int return_sequences, k2c_activationType *recurrent_activation,
-              k2c_activationType *output_activation);
-void k2c_simpleRNNcell(float * state, const float * input, const k2c_tensor* kernel,
-                       const k2c_tensor* recurrent_kernel, const k2c_tensor* bias,
-                       float * fwork, k2c_activationType *output_activation);
-void k2c_simpleRNN(k2c_tensor* output, const k2c_tensor* input, float * state,
-                   const k2c_tensor* kernel, const k2c_tensor* recurrent_kernel,
-                   const k2c_tensor* bias, float * fwork, const int go_backwards,
-                   const int return_sequences, k2c_activationType *output_activation);
-void k2c_grucell(float * state, const float * input, const k2c_tensor* kernel,
-                 const k2c_tensor* recurrent_kernel, const k2c_tensor* bias, float * fwork,
-                 const int reset_after, k2c_activationType *recurrent_activation,
-                 k2c_activationType *output_activation);
-void k2c_gru(k2c_tensor* output, const k2c_tensor* input, float * state,
-             const k2c_tensor* kernel, const k2c_tensor* recurrent_kernel,
-             const k2c_tensor* bias, float * fwork, const int reset_after,
-             const int go_backwards, const int return_sequences,
-             k2c_activationType *recurrent_activation,
-             k2c_activationType *output_activation);
 
